@@ -1,0 +1,15 @@
+{
+  "name": "gwj-skills",
+  "owner": {
+    "name": "gwaijian",
+    "email": "gwaijian@gmail.com"
+  },
+  "description": "Personal Claude Code skills marketplace",
+  "plugins": [
+    {
+      "name": "claude-skills",
+      "source": "./",
+      "description": "Personal skills: ui-redesign, spec-docs"
+    }
+  ]
+}
