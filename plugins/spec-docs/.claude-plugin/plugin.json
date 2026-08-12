@@ -1,0 +1,8 @@
+{
+  "name": "spec-docs",
+  "description": "Spec-Driven Development four-document workflow: research, interview to lock decisions, then generate feature spec, implementation plan, user journey, and phase tracker.",
+  "author": {
+    "name": "gwaijian",
+    "email": "gwaijian@gmail.com"
+  }
+}

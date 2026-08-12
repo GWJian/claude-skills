@@ -7,9 +7,14 @@
   "description": "Personal Claude Code skills marketplace",
   "plugins": [
     {
-      "name": "claude-skills",
-      "source": "./",
-      "description": "Personal skills: ui-redesign, spec-docs"
+      "name": "ui-redesign",
+      "source": "./plugins/ui-redesign",
+      "description": "Research-driven screen redesign: design doc + HTML mockup, docs only"
+    },
+    {
+      "name": "spec-docs",
+      "source": "./plugins/spec-docs",
+      "description": "Spec-Driven Development four-document workflow"
     }
   ]
 }

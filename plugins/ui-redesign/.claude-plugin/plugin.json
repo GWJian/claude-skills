@@ -1,0 +1,8 @@
+{
+  "name": "ui-redesign",
+  "description": "Research-driven UI/UX redesign of one screen: code analysis, live screenshots, pattern research, then a design doc + HTML mockup. Docs only, never touches app code.",
+  "author": {
+    "name": "gwaijian",
+    "email": "gwaijian@gmail.com"
+  }
+}
