@@ -14,7 +14,7 @@
     {
       "name": "spec-docs",
       "source": "./plugins/spec-docs",
-      "description": "Spec-Driven Development four-document workflow"
+      "description": "Spec-Driven Development doc workflow (3-4 docs)"
     }
   ]
 }

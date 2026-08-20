@@ -30,10 +30,10 @@ Docs first, code second. Before coding a feature, it researches your codebase, i
 |-----|------------|
 | `01` feature spec | The ticket — summary, flow, edge cases, and a LOCKED decision table |
 | `02` implementation plan | The blueprint — verified current-state inventory + schema/UI design |
-| `03` user journey | Per-role walkthrough of the whole feature, plus FAQ |
+| `03` user journey | Per-role walkthrough of the whole feature, plus FAQ *(optional — only when ≥2 roles have meaningfully different journeys)* |
 | `04` phase tracker | Checkbox construction schedule — the single source of truth for progress |
 
-Scales by feature size: large features get all four docs, medium get `01` + `04`, trivial ones skip the workflow entirely.
+Scales by feature size: large features get `01` + `02` + `04` (plus `03` only for genuinely multi-role features), medium get `01` + `04`, trivial ones skip the workflow entirely.
 
 **Use it when** a feature has real decisions to lock (cross-system, schema changes, multiple roles).
 
