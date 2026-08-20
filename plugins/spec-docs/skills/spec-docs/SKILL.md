@@ -1,6 +1,6 @@
 ---
 name: spec-docs
-description: Drive the Spec-Driven Development four-document workflow for a new feature - research the codebase, interview the user to lock decisions, then generate docs/<feature>/ containing 01 feature spec (with LOCKED decision table), 02 implementation plan, 03 user journey, 04 phase tracker. Use when the user invokes /spec-docs, says "spec 流程", "四文档", "spec-driven", or asks to write requirement/design docs before coding a feature.
+description: Drive the Spec-Driven Development doc workflow (3-4 docs) for a new feature - research the codebase, interview the user to lock decisions, then generate docs/<feature>/ containing 01 feature spec (with LOCKED decision table), 02 implementation plan, 03 user journey (optional - multi-role features only), 04 phase tracker. Use when the user invokes /spec-docs, says "spec 流程", "四文档", "spec-driven", or asks to write requirement/design docs before coding a feature.
 ---
 
 Drive the Spec-Driven Development (SDD) workflow: docs first, lock them, then code follows the docs. The deliverable is a `docs/<feature_name>/` folder with numbered documents containing **complete content — never empty skeletons**.
@@ -9,7 +9,7 @@ Drive the Spec-Driven Development (SDD) workflow: docs first, lock them, then co
 
 - Take the feature name from the arguments (convert to snake_case). If missing, ask for it.
 - Decide the document set by feature size (ask if unclear):
-  - **Large** (cross-repo / cross-system / multi-role / schema changes) → all four docs (01–04)
+  - **Large** (cross-repo / cross-system / multi-role / schema changes) → 01 + 02 + 04. Add 03 **only if** the feature has ≥2 distinct user roles whose journeys differ meaningfully (e.g. admin configures, customer consumes, and the flows interact) — otherwise skip 03 and cover per-role steps in 01's Flow section.
   - **Medium** (single-repo feature that still has decisions to lock) → 01 + 04 only
   - **Trivial** (done within a day, no decisions) → say so and recommend skipping this workflow; just do the change.
 
@@ -109,6 +109,8 @@ Two or three sentences: background + what this document delivers.
 ```
 
 ### 03 — `03-<feature_name>_journey.md` (walk it through, per role)
+
+> **Optional** — only for multi-role features (see Step 1). If skipped, per-role steps live in 01's Flow section.
 
 ```markdown
 # <Feature name> — Complete Journey
