@@ -17,13 +17,14 @@ Drive the Spec-Driven Development (SDD) workflow: docs first, lock them, then co
 ## Step 2 — RESEARCH (before writing anything)
 
 - Read the relevant code, check the real database schema (use MCP tools when available), and inventory what already exists to reuse: tables, services, components, patterns.
+- When a decision hinges on data that can differ per environment (existing rows and their ids, flags, deployed function versions), verify it read-only on the environment the feature ships to as well, not only on dev.
 - Record findings as **verified facts** — they become 02's current-state inventory. Never design from assumptions.
 - Any question answerable from the codebase must be answered by exploring it, not by asking the user.
 
 ## Step 3 — INTERVIEW (lock the decisions)
 
 - Interview the user one decision at a time, numbered (1/, 2/, 3/ …), each with a recommended answer and the reason, options labeled (a, b, c).
-- Cover at least: scope (what's in / out / deferred), core behavior rules, eligibility & validation, edge cases & failure handling, abuse/fraud concerns, what must be configurable without a deploy, limits/caps, and which repo/service owns each part.
+- Cover at least: scope (what's in / out / deferred), core behavior rules, eligibility & validation, edge cases & failure handling, abuse/fraud concerns, what must be configurable without a deploy, limits/caps, **notifications** (who is told what, when, through which channel and in which language; "nobody" is a valid answer), **finding it again** (after the main flow, how each role gets back to the result: history list, menu entry, deep link, admin filter), and which repo/service owns each part.
 - Compile everything into a **Decisions (LOCKED)** table and show it for final confirmation before generating any document.
 
 ## Step 4 — GENERATE
@@ -33,9 +34,9 @@ Create `docs/<feature_name>/` and write the documents with full content followin
 ## Standing rules
 
 - Documents are written in **English**; converse with the user in their language.
-- A requirement change later = add a **Rev note** at the top of 01/02 (`**Rev YYYY-MM-DD (a):** what changed and why`) and update the body to match — never rewrite from scratch, never silently edit locked decisions.
+- A requirement change later = add a **Rev note** at the top of 01/02 (`**Rev YYYY-MM-DD (a):** what changed and why`) and update the body to match — never rewrite from scratch, never silently edit locked decisions. One line per rev, newest first, directly under the status table; the **Last updated** cell names only the latest rev. The Design artifacts sync log keeps the same order.
 - 04 is the single source of truth for progress: during implementation, tick its checkboxes and update the status table as items complete.
-- Slice phases so each is independently verifiable; backend before UI; verification as its own phase; every phase ends with a one-line objective **Done when**.
+- Slice phases so each is independently verifiable; backend before UI; verification as its own phase; every phase ends with a one-line objective **Done when**; the manual steps from 02 §4.5 appear as their own checkbox items so they are not lost at promotion.
 - In 04, reference 02's sections by § number instead of duplicating content.
 - spec-docs does not draw wireframes. If the feature has a UI and no design exists yet, say so in 01 "Design artifacts" and suggest /ui-redesign or a Design canvas.
 
@@ -109,6 +110,7 @@ Two or three sentences: background + what this document delivers.
 
 ## 3. Current-state inventory (verified facts)
 - Existing tables / functions / components to reuse. Each item names its source (`path:line`, DB object name, deployed edge-function name + version, or the query used) and the date verified.
+- Also list what was checked and found **not** to need change, with the reason and source, so nobody re-investigates it.
 
 ## 4. Schema / backend design
 ### 4.1 Tables
@@ -120,6 +122,9 @@ One row per RPC, trigger or edge function:
 | Function | Caller | Does | Error codes |
 |---|---|---|---|
 
+### 4.5 Manual steps per environment (not in migrations)
+Secrets / vault entries, function env vars, hard-coded URLs or ids that differ between environments, third-party dashboard settings. One line each: what, where, who runs it, and what changes when promoting to the next environment. Write "none" if there are none.
+
 ## 5. Frontend / UI design
 **Existing files to modify**
 | File | Change (with ~line refs) |
@@ -130,6 +135,7 @@ One row per RPC, trigger or edge function:
 |---|---|
 
 ## 6. Verification plan
+- Open with the test environment's constraints (payment sandbox behaviour, email sandbox recipients, test accounts and roles needed) so a failing check is not mistaken for a bug
 - Group by layer: database first, then each repo
 - Include at least one race, one permission-denied, and one wrong-state transition
 - Each phase in 04 points here for its "Done when"
