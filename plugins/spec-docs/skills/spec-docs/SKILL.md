@@ -12,6 +12,7 @@ Drive the Spec-Driven Development (SDD) workflow: docs first, lock them, then co
   - **Large** (cross-repo / cross-system / multi-role / schema changes) → 01 + 02 + 04. Add 03 **only if** the feature has ≥2 distinct user roles whose journeys differ meaningfully (e.g. admin configures, customer consumes, and the flows interact) — otherwise skip 03 and cover per-role steps in 01's Flow section.
   - **Medium** (single-repo feature that still has decisions to lock) → 01 + 04 only
   - **Trivial** (done within a day, no decisions) → say so and recommend skipping this workflow; just do the change.
+  - **Already documented** (a spec or hand-off doc for this feature already exists in `docs/`) → do **not** regenerate or re-interview. Read it, map its sections onto the templates below, report the gaps in one short table, and stop. Fill real gaps by editing that doc with a Rev note at the top. A different file layout alone is not a gap.
 
 ## Step 2 — RESEARCH (before writing anything)
 
