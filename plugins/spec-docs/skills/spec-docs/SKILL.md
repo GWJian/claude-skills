@@ -37,6 +37,7 @@ Create `docs/<feature_name>/` and write the documents with full content followin
 - 04 is the single source of truth for progress: during implementation, tick its checkboxes and update the status table as items complete.
 - Slice phases so each is independently verifiable; backend before UI; verification as its own phase; every phase ends with a one-line objective **Done when**.
 - In 04, reference 02's sections by § number instead of duplicating content.
+- spec-docs does not draw wireframes. If the feature has a UI and no design exists yet, say so in 01 "Design artifacts" and suggest /ui-redesign or a Design canvas.
 
 ## Templates
 
@@ -47,7 +48,15 @@ Create `docs/<feature_name>/` and write the documents with full content followin
 
 **Type:** Feature
 **Priority:** TBD
-**Status:** Draft | Decisions locked — design ready
+
+> **Read this first if you pick this feature up in a new chat.**
+
+| | |
+|---|---|
+| **Design (mockups)** | ⬜ none / ✅ canvas or 2D docs, see Design artifacts |
+| **Plan (02)** | Draft / Decisions locked |
+| **Implementation** | ❌ **NOT STARTED** until code lands, then "see 04" |
+| **Last updated** | YYYY-MM-DD, one line on the latest rev |
 <!-- On requirement changes add a Rev note here: **Rev YYYY-MM-DD (a):** what changed and why -->
 
 ## Summary
@@ -60,6 +69,13 @@ As a <role>, I want <action> so <benefit>.
 1. Step one
 2. Step two
 
+## Design artifacts
+<!-- Only when the feature has a UI. Backend-only features omit this section. -->
+- **Where the design lives:** a Claude Design canvas (URL with share key), a `docs/<target>_redesign/` folder (ASCII wireframes in its 01 doc + `mockup.html`, from /ui-redesign), or 2D ASCII wireframes inline here. Write "none yet" if nothing exists.
+- **How to edit it:** for a canvas, the Artifact tool steps (read the URL, then `project/canvas.json` and `project/<Name>.dc.html`, republish to the same URL). For local files, the paths.
+- **Sync log:** one line per sync, `YYYY-MM-DD (rev N): what changed on the design`, so the design and the spec never drift silently.
+- All values on mockups are sample values.
+
 ## Decisions (LOCKED)
 | # | Decision | Answer |
 |---|----------|--------|
@@ -71,8 +87,10 @@ As a <role>, I want <action> so <benefit>.
 ## Acceptance criteria
 - [ ] Acceptance point one
 
-## Related projects
-- Which codebases / services are involved, and who owns what
+## Related paths and tools
+- Absolute repo paths, and who owns each part
+- MCP tool per environment, and the target environment
+- Deployed-only artefacts (edge functions, DB functions) and the tool that reads them
 ```
 
 ### 02 — `02-<feature_name>_implementation_plan.md` (the blueprint)
@@ -90,19 +108,31 @@ Two or three sentences: background + what this document delivers.
 (Copy the decision table from 01, or reference it)
 
 ## 3. Current-state inventory (verified facts)
-- Existing tables / functions / components to reuse — item by item, marked "verified"
+- Existing tables / functions / components to reuse. Each item names its source (`path:line`, DB object name, deployed edge-function name + version, or the query used) and the date verified.
 
 ## 4. Schema / backend design
 ### 4.1 Tables
 ### 4.2 Permissions (RLS etc.)
 ### 4.3 Config
 ### 4.4 Core functions / engine
+One row per RPC, trigger or edge function:
+
+| Function | Caller | Does | Error codes |
+|---|---|---|---|
 
 ## 5. Frontend / UI design
-- Files to create/modify + existing components used as models
+**Existing files to modify**
+| File | Change (with ~line refs) |
+|---|---|
+
+**New files**
+| File | Purpose, and the existing component it copies |
+|---|---|
 
 ## 6. Verification plan
-- How to prove it works (test steps)
+- Group by layer: database first, then each repo
+- Include at least one race, one permission-denied, and one wrong-state transition
+- Each phase in 04 points here for its "Done when"
 
 ## 7. Risks & notes
 
