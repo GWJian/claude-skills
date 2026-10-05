@@ -8,6 +8,7 @@ Drive the Spec-Driven Development (SDD) workflow: docs first, lock them, then co
 ## Step 1 — SETUP
 
 - Take the feature name from the arguments (convert to snake_case). If missing, ask for it.
+- If no canvas link was given, ask once (together with any other setup question): "Already planned this on a Design canvas? Paste the link, or say no." A link → the **Canvas exists** path below. Ask before research, since a canvas changes what gets asked.
 - Decide the document set by feature size (ask if unclear):
   - **Large** (cross-repo / cross-system / multi-role / schema changes) → 01 + 02 + 04. Add 03 **only if** the feature has ≥2 distinct user roles whose journeys differ meaningfully (e.g. admin configures, customer consumes, and the flows interact) — otherwise skip 03 and cover per-role steps in 01's Flow section.
   - **Medium** (single-repo feature that still has decisions to lock) → 01 + 04 only. With no 02, 04 points to 01 (Decisions, Acceptance criteria) instead of 02 §, and 01's **Plan (02)** row says `n/a (medium)`.
