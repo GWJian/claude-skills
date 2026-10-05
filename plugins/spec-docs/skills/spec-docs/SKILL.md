@@ -1,6 +1,6 @@
 ---
 name: spec-docs
-description: Drive the Spec-Driven Development doc workflow (3-4 docs) for a new feature - research the codebase, interview the user to lock decisions, then generate docs/<feature>/ containing 01 feature spec (with LOCKED decision table), 02 implementation plan, 03 user journey (optional - multi-role features only), 04 phase tracker. Use when the user invokes /spec-docs, says "spec 流程", "四文档", "spec-driven", or asks to write requirement/design docs before coding a feature.
+description: Drive the Spec-Driven Development doc workflow (2-4 docs) for a new feature - research the codebase, interview the user to lock decisions, then generate docs/<feature>/ containing 01 feature spec (with LOCKED decision table), 02 implementation plan, 03 user journey (optional - multi-role features only), 04 phase tracker. Use when the user invokes /spec-docs, says "spec 流程", "四文档", "spec-driven", or asks to write requirement/design docs before coding a feature, or hands over a Design canvas link to turn into docs.
 ---
 
 Drive the Spec-Driven Development (SDD) workflow: docs first, lock them, then code follows the docs. The deliverable is a `docs/<feature_name>/` folder with numbered documents containing **complete content — never empty skeletons**.
@@ -10,9 +10,10 @@ Drive the Spec-Driven Development (SDD) workflow: docs first, lock them, then co
 - Take the feature name from the arguments (convert to snake_case). If missing, ask for it.
 - Decide the document set by feature size (ask if unclear):
   - **Large** (cross-repo / cross-system / multi-role / schema changes) → 01 + 02 + 04. Add 03 **only if** the feature has ≥2 distinct user roles whose journeys differ meaningfully (e.g. admin configures, customer consumes, and the flows interact) — otherwise skip 03 and cover per-role steps in 01's Flow section.
-  - **Medium** (single-repo feature that still has decisions to lock) → 01 + 04 only
+  - **Medium** (single-repo feature that still has decisions to lock) → 01 + 04 only. With no 02, 04 points to 01 (Decisions, Acceptance criteria) instead of 02 §, and 01's **Plan (02)** row says `n/a (medium)`.
   - **Trivial** (done within a day, no decisions) → say so and recommend skipping this workflow; just do the change.
-  - **Already documented** (a spec or hand-off doc for this feature already exists in `docs/`) → do **not** regenerate or re-interview. Read it, map its sections onto the templates below, report the gaps in one short table, and stop. Fill real gaps by editing that doc with a Rev note at the top. A different file layout alone is not a gap.
+  - **Already documented** (a spec or hand-off doc for this feature already exists in `docs/`) → do **not** regenerate or re-interview. Read it, map its sections onto the templates below, report the gaps in one short table, and stop. If the user wants them filled, edit that doc with a Rev note at the top. A different file layout alone is not a gap.
+  - **Canvas exists** (the user gives a claude.ai Design canvas link with the UI and a DECISIONS note) → proceed from it. Read it read-only with the Artifact tool: `project/canvas.json` (sticky notes + board titles), then the `.dc.html` of the non-UI boards (DB, flows). Pick the document set by size as above. More than one canvas (e.g. a counter-proposal) → ask which one was chosen.
 
 ## Step 2 — RESEARCH (before writing anything)
 
@@ -20,9 +21,11 @@ Drive the Spec-Driven Development (SDD) workflow: docs first, lock them, then co
 - When a decision hinges on data that can differ per environment (existing rows and their ids, flags, deployed function versions), verify it read-only on the environment the feature ships to as well, not only on dev.
 - Record findings as **verified facts** — they become 02's current-state inventory. Never design from assumptions.
 - Any question answerable from the codebase must be answered by exploring it, not by asking the user.
+- Facts on a canvas ("exists", "verified", row ids, function names) are claims: verify each before it goes into 02 §3.
 
 ## Step 3 — INTERVIEW (lock the decisions)
 
+- From a canvas: pre-fill the decisions from its DECISIONS note and interview only the checklist items below that it does not answer.
 - Interview the user one decision at a time, numbered (1/, 2/, 3/ …), each with a recommended answer and the reason, options labeled (a, b, c).
 - Cover at least: scope (what's in / out / deferred), core behavior rules, eligibility & validation, edge cases & failure handling, abuse/fraud concerns, what must be configurable without a deploy, limits/caps, **notifications** (who is told what, when, through which channel and in which language; "nobody" is a valid answer), **finding it again** (after the main flow, how each role gets back to the result: history list, menu entry, deep link, admin filter), and which repo/service owns each part.
 - Compile everything into a **Decisions (LOCKED)** table and show it for final confirmation before generating any document.
@@ -30,6 +33,21 @@ Drive the Spec-Driven Development (SDD) workflow: docs first, lock them, then co
 ## Step 4 — GENERATE
 
 Create `docs/<feature_name>/` and write the documents with full content following the templates below. Then report a short summary and point to Phase 1 of 04 as the next step.
+
+**From a canvas** — copy its text into the docs, link its screens by board title (never transcribe a mockup):
+
+| Canvas | Goes to |
+|---|---|
+| DECISIONS note | 01 Decisions (LOCKED) |
+| Flow / per-role notes, rows of screens | 01 Flow (03 if multi-role), screens linked by board title |
+| Small details: resolved ones / open ones | 01 Decisions / 01 Edge cases |
+| Model / reuse notes | 02 §3, after verifying |
+| Behavior-rule notes (capacity, refund, check-in …) | 02 §4.4; any rule the user chose also in 01 Decisions |
+| DB boards (tables, RPCs, triggers, flows) | 02 §4, incl. the functions table with error codes |
+| Phasing (v1.5, v2 …) | 02 §8 Deferred |
+| "Not taken, and why" (from another canvas) | 02 §7 |
+
+Then add what a canvas lacks: acceptance criteria, 02 §4.5 manual steps (collect any per-environment URL or secret the boards mention), 02 §6 verification, and 04.
 
 ## Standing rules
 
@@ -74,7 +92,7 @@ As a <role>, I want <action> so <benefit>.
 <!-- Only when the feature has a UI. Backend-only features omit this section. -->
 - **Where the design lives:** a Claude Design canvas (URL with share key), a `docs/<target>_redesign/` folder (ASCII wireframes in its 01 doc + `mockup.html`, from /ui-redesign), or 2D ASCII wireframes inline here. Write "none yet" if nothing exists.
 - **How to edit it:** for a canvas, the Artifact tool steps (read the URL, then `project/canvas.json` and `project/<Name>.dc.html`, republish to the same URL). For local files, the paths.
-- **Sync log:** one line per sync, `YYYY-MM-DD (rev N): what changed on the design`, so the design and the spec never drift silently.
+- **Sync log:** one line per sync, `YYYY-MM-DD (rev N): what changed on the design`, so the design and the spec never drift silently. Docs built from a canvas start it with `YYYY-MM-DD (rev N): imported into docs from version <id>`; a later canvas change = a Rev note in 01/02 plus a sync-log line. spec-docs never writes to the canvas.
 - All values on mockups are sample values.
 
 ## Decisions (LOCKED)

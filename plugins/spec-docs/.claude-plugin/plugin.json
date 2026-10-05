@@ -1,6 +1,6 @@
 {
   "name": "spec-docs",
-  "description": "Spec-Driven Development doc workflow (3-4 docs): research, interview to lock decisions, then generate feature spec, implementation plan, phase tracker, and (for multi-role features) a user journey.",
+  "description": "Spec-Driven Development doc workflow (2-4 docs): research, interview to lock decisions, then generate feature spec, implementation plan, phase tracker, and (for multi-role features) a user journey.",
   "author": {
     "name": "gwaijian",
     "email": "gwaijian@gmail.com"

@@ -37,6 +37,8 @@ Scales by feature size: large features get `01` + `02` + `04` (plus `03` only fo
 
 **Use it when** a feature has real decisions to lock (cross-system, schema changes, multiple roles).
 
+Already planned on a Design canvas (UI + a DECISIONS note)? Pass the link; it's copied into the docs and only the gaps are asked.
+
 Trigger with `/spec-docs <feature-name>`, or just ask for spec-driven docs before coding.
 
 ## Update (after pushing changes)
