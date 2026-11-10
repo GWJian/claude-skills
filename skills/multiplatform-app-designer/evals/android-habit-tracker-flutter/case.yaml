@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: android-habit-tracker-flutter
+expected_outcome: |
+  Android-only design with a Flutter handoff. The run asks (or self-answers) the brief including platform, stack and UI language, reads slop.md and platform-android.md, writes three concept sentences from different source families with at most one printed form, renders the Android core screen three ways on the Pixel canvas with real content, picks one with reasons, writes DIRECTION.md with tokens including Material 3 role names and a dynamic-colour decision, designs 5 to 8 Android screens plus an adaptive icon using Material 3 Expressive structure (nav bar or rail, FAB at the end or toolbar, tonal surfaces, Material Symbols, no glass), shoots and scans them with no FAILs and every warn answered, runs at least two critique rounds, and writes HANDOFF.md with Flutter ThemeData/TextTheme token exports. No greeting header, no emoji icons, no purple gradient, no centred FAB, no card stack.

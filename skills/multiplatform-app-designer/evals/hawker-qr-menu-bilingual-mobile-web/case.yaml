@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: hawker-qr-menu-bilingual-mobile-web
+expected_outcome: |
+  Mobile web only, bilingual EN/中文, stack to be asked or tokens only. The run notices the Chinese UI and applies type.md section 8 (CJK faces appended to stacks, no italics, taller line height, no negative tracking on CJK display, consistent primary/secondary language order), writes every string in both languages in the content step, designs a first screen that is the ordering action above the fold (not a landing page), with real Malaysian hawker dishes and uneven RM prices, a cart or order state and an order-placed state, in a phone browser with the address bar present and nothing important pinned to the bottom edge. Renders with a CJK-capable font or states the stand-in, scan clean, two critique rounds, HANDOFF.md with tokens and both-language content. Imagery is real or a designed colour or shape field, never grey placeholders.
