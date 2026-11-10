@@ -1,0 +1,53 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Multiplatform App Designer check</title>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="device.css">
+<style>
+  :root { --ground: #F3F1EC; --ink: #16130F; --ink2: #6B655C; --accent: #1F6F5C; }
+  .screen { background: var(--ground); color: var(--ink); }
+  .wrap { position: absolute; inset: var(--safe-top) 20px var(--safe-bottom); display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+  .ios h1 { font: 800 60px/0.95 var(--sf); font-stretch: 125%; letter-spacing: -2px; margin: 0; }
+  .and h1 { font: 600 56px/1 var(--gsf); letter-spacing: -1px; margin: 0; }
+  .web h1 { font: 500 44px/1.05 var(--web-serif); letter-spacing: -0.5px; margin: 0; font-optical-sizing: auto; }
+  .desk .wrap { inset: calc(var(--safe-top) + 64px) 80px 64px; justify-content: flex-start; }
+  .desk h1 { font: 500 72px/1 var(--web-serif); letter-spacing: -1.5px; margin: 0; max-width: 14ch; }
+  p { margin: 0; color: var(--ink2); max-width: 36ch; }
+  .row { display: flex; gap: 12px; align-items: center; color: var(--accent); }
+  .msym { font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24; }
+  .app-icon { background: var(--accent); display: grid; place-items: center; }
+  .app-icon span { width: 54%; height: 54%; border-radius: 28% 28% 50% 50%; background: var(--ground); }
+</style></head><body>
+
+<section class="screen ios" data-device="ios" data-name="check-ios">
+  <div class="wrap">
+    <h1>Ready.</h1>
+    <p class="t-body">iPhone 17 class. SF Pro renders on a Mac; Inter stands in elsewhere.</p>
+  </div>
+</section>
+
+<section class="screen and" data-device="android" data-name="check-android" data-time="10:08">
+  <div class="wrap">
+    <h1>Ready.</h1>
+    <p class="m3-body-l">Pixel class, Material 3 Expressive. Google Sans Flex and Roboto Flex, bundled.</p>
+    <div class="row"><span class="msym">eco</span><span class="m3-label-l">Material Symbols</span></div>
+  </div>
+</section>
+
+<section class="screen web" data-device="web-mobile" data-name="check-web-mobile" data-url="ready.example" data-time="10:08">
+  <div class="wrap">
+    <h1>Ready.</h1>
+    <p style="font: 400 16px/1.5 var(--web-sans)">A phone browser: Chrome bar on a Pixel body. Add data-browser="safari" for an iPhone.</p>
+  </div>
+</section>
+
+<section class="screen web desk" data-device="web-desktop" data-name="check-web-desktop" data-url="ready.example/dashboard">
+  <div class="wrap">
+    <h1>Ready for the wide screen.</h1>
+    <p style="font: 400 18px/1.5 var(--web-sans)">A desktop browser window, 1440 by 900. Content starts under the frame.</p>
+  </div>
+</section>
+
+<section class="app-icon" data-device="android" data-name="check-icon"><span></span></section>
+
+<script src="device.js"></script>
+</body></html>
