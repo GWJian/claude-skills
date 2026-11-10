@@ -1,0 +1,14 @@
+{
+  "name": "multiplatform-app-designer",
+  "private": true,
+  "description": "Renders, scans and critiques app mockups for Android, iOS, mobile web and desktop web. npm install pulls the renderer driver and Material Symbols; the text fonts are bundled.",
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/shoot.mjs assets/check.html --out /tmp/mpad-check --scale 1",
+    "fonts:cjk": "npm install --no-fund --no-audit @fontsource-variable/noto-sans-sc@5"
+  },
+  "dependencies": {
+    "material-symbols": "^0.48.3",
+    "playwright-core": "^1.65.0"
+  }
+}
