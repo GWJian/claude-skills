@@ -16,7 +16,14 @@ Drive the Spec-Driven Development (SDD) workflow: docs first, lock them, then co
   - **Already documented** (a spec or hand-off doc for this feature already exists in `docs/`) → do **not** regenerate or re-interview. Read it, map its sections onto the templates below, report the gaps in one short table, and stop. If the user wants them filled, edit that doc with a Rev note at the top. A different file layout alone is not a gap.
   - **Canvas exists** (the user gives a claude.ai Design canvas link with the UI and a DECISIONS note) → proceed from it. Read it read-only with the Artifact tool: `project/canvas.json` (sticky notes + board titles), then the `.dc.html` of the non-UI boards (DB, flows). Pick the document set by size as above. More than one canvas (e.g. a counter-proposal) → ask which one was chosen.
 
-## Step 2 — RESEARCH (before writing anything)
+## Step 2 — BACKLOG
+
+`docs/backlog.md` is the project's one planning doc: what is built, what comes next, what was left out on purpose. Skip this step on the **Trivial** and **Already documented** paths.
+
+- **Missing** → create it from the Backlog template below, with this feature as the first row of Next features. Tell the user it was created. Fill Built so far only with what the user or git history confirms; never guess.
+- **Exists** → read it, do not edit it. It is research input: what is built, what earlier features decided (Left out on purpose), known issues near this feature, and this feature's own row in Next features if it has one. A different layout is fine; do not reshape it to the template.
+
+## Step 3 — RESEARCH (before writing anything)
 
 - Read the relevant code, check the real database schema (use MCP tools when available), and inventory what already exists to reuse: tables, services, components, patterns.
 - When a decision hinges on data that can differ per environment (existing rows and their ids, flags, deployed function versions), verify it read-only on the environment the feature ships to as well, not only on dev.
@@ -24,16 +31,18 @@ Drive the Spec-Driven Development (SDD) workflow: docs first, lock them, then co
 - Any question answerable from the codebase must be answered by exploring it, not by asking the user.
 - Facts on a canvas ("exists", "verified", row ids, function names) are claims: verify each before it goes into 02 §3.
 
-## Step 3 — INTERVIEW (lock the decisions)
+## Step 4 — INTERVIEW (lock the decisions)
 
 - From a canvas: pre-fill the decisions from its DECISIONS note and interview only the checklist items below that it does not answer.
 - Interview the user one decision at a time, numbered (1/, 2/, 3/ …), each with a recommended answer and the reason, options labeled (a, b, c).
 - Cover at least: scope (what's in / out / deferred), core behavior rules, eligibility & validation, edge cases & failure handling, abuse/fraud concerns, what must be configurable without a deploy, limits/caps, **notifications** (who is told what, when, through which channel and in which language; "nobody" is a valid answer), **finding it again** (after the main flow, how each role gets back to the result: history list, menu entry, deep link, admin filter), and which repo/service owns each part.
 - Compile everything into a **Decisions (LOCKED)** table and show it for final confirmation before generating any document.
 
-## Step 4 — GENERATE
+## Step 5 — GENERATE
 
 Create `docs/<feature_name>/` and write the documents with full content following the templates below. Then report a short summary and point to Phase 1 of 04 as the next step.
+
+Write only the numbered documents here. Do not put this feature's content into `docs/backlog.md`: while the feature is being built, `docs/<feature_name>/` is the truth.
 
 **From a canvas** — copy its text into the docs, link its screens by board title (never transcribe a mockup):
 
@@ -57,9 +66,37 @@ Then add what a canvas lacks: acceptance criteria, 02 §4.5 manual steps (collec
 - 04 is the single source of truth for progress: during implementation, tick its checkboxes and update the status table as items complete.
 - Slice phases so each is independently verifiable; backend before UI; verification as its own phase; every phase ends with a one-line objective **Done when**; the manual steps from 02 §4.5 appear as their own checkbox items so they are not lost at promotion.
 - In 04, reference 02's sections by § number instead of duplicating content.
+- The backlog is updated at the end, not the start. Once the feature is committed and the user asks to fold its docs in: add a row to Built so far (what it does, the commit, `git show <commit>:docs/<feature_name>/01-<feature_name>.md`), remove its row from Next features, move its deferred and out-of-scope decisions to Left out on purpose, add any issues found but not fixed to Known issues, then delete `docs/<feature_name>/` (it stays readable in git). Never fold in or delete docs unasked.
 - spec-docs does not draw wireframes. If the feature has a UI and no design exists yet, say so in 01 "Design artifacts" and suggest /ui-redesign or a Design canvas.
 
 ## Templates
+
+### Backlog — `docs/backlog.md` (only when it does not exist yet)
+
+```markdown
+# Backlog
+
+What is built, what comes next, and what was left out on purpose. This is the only planning doc in the repo; a feature's spec, plan and tracker are written under `docs/<feature>/` while it is being built and removed once it is committed (they stay readable in git, see "Built so far").
+
+Last updated: YYYY-MM-DD.
+
+## Built so far
+
+| What | Commit | Its docs, in git |
+|---|---|---|
+
+## Next features
+
+Each needs its own spec first: run `/spec-docs` with its name.
+
+| # | Feature | Why this rank | What it needs, from the code | Size |
+|---|---|---|---|---|
+| 1 | <this feature> | … | … | S / M / L |
+
+## Known issues, small
+
+## Left out on purpose
+```
 
 ### 01 — `01-<feature_name>.md` (feature spec ≈ a ClickUp ticket in its complete form)
 

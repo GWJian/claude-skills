@@ -37,6 +37,8 @@ Scales by feature size: large features get `01` + `02` + `04` (plus `03` only fo
 
 **Use it when** a feature has real decisions to lock (cross-system, schema changes, multiple roles).
 
+It also keeps one planning doc, `docs/backlog.md` (built so far, next features, known issues, left out on purpose): created on the first run if missing, read as input on later runs, and updated only at the end, when you ask to fold a committed feature's docs into it.
+
 Already planned on a Design canvas (UI + a DECISIONS note)? Pass the link; it's copied into the docs and only the gaps are asked.
 
 Trigger with `/spec-docs <feature-name>`, or just ask for spec-driven docs before coding.
