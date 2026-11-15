@@ -16,7 +16,7 @@ Install one, both, or neither — each plugin is independent.
 
 Research-driven redesign of ONE messy screen. Docs only — it never touches app code.
 
-It interviews you to lock scope, analyzes the screen's code, screenshots the live app (when running), researches design patterns, then delivers a `docs/<target>_redesign/` folder: a design doc + a self-contained HTML mockup you can open and judge.
+It interviews you to lock scope, analyzes the screen's code, screenshots the live app (when running), researches design patterns, and confirms the diagnosis and direction with you. Then it delivers a `docs/<target>_redesign/` folder with a design doc, plus a mockup you can open and judge: a self-contained HTML file or a Design canvas, your choice.
 
 **Use it when** a core screen is genuinely cluttered and you need a proposal (doc + mockup) to show others before touching code. For small tweaks — like moving one button — just edit the code directly; the full pipeline is slower than the change itself.
 

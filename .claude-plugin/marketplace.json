@@ -9,7 +9,7 @@
     {
       "name": "ui-redesign",
       "source": "./plugins/ui-redesign",
-      "description": "Research-driven screen redesign: design doc + HTML mockup, docs only"
+      "description": "Research-driven screen redesign: design doc + mockup (HTML or Design canvas), docs only"
     },
     {
       "name": "spec-docs",
