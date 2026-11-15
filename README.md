@@ -32,6 +32,7 @@ Docs first, code second. Before coding a feature, it researches your codebase, i
 | `02` implementation plan | The blueprint — verified current-state inventory + schema/UI design |
 | `03` user journey | Per-role walkthrough of the whole feature, plus FAQ *(optional — only when ≥2 roles have meaningfully different journeys)* |
 | `04` phase tracker | Checkbox construction schedule — the single source of truth for progress |
+| `docs/backlog.md` | The project's one planning doc, outside the feature folder — see [The backlog](#the-backlog) |
 
 Scales by feature size: large features get `01` + `02` + `04` (plus `03` only for genuinely multi-role features), medium get `01` + `04`, trivial ones skip the workflow entirely.
 
@@ -41,11 +42,20 @@ Each `01` opens with a "read this first" status table, so a new chat can pick th
 
 **Use it when** a feature has real decisions to lock (cross-system, schema changes, multiple roles).
 
-It also keeps one planning doc, `docs/backlog.md` (built so far, next features, known issues, left out on purpose): created on the first run if missing, read as input on later runs, and updated only at the end, when you ask to fold a committed feature's docs into it.
-
 Already planned on a Design canvas (UI + a DECISIONS note)? Pass the link; it's copied into the docs and only the gaps are asked.
 
 Trigger with `/spec-docs <feature-name>`, or just ask for spec-driven docs before coding.
+
+### The backlog
+
+spec-docs keeps one planning doc per project, `docs/backlog.md`, with four sections: Built so far, Next features, Known issues, Left out on purpose.
+
+| When | What happens to `docs/backlog.md` |
+|------|-----------------------------------|
+| First run, file missing | Created from a template, with this feature as the first row of Next features |
+| Later runs | Read only, as research input: what is built, what earlier features decided |
+| While the feature is being built | Not touched — `docs/<feature>/` is the truth |
+| After the feature is committed, when you ask | The feature's docs are folded in (a Built so far row pointing at the commit, deferred decisions, unfixed issues), then `docs/<feature>/` is deleted; it stays readable in git |
 
 ## Update (after pushing changes)
 
