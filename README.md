@@ -35,6 +35,10 @@ Docs first, code second. Before coding a feature, it researches your codebase, i
 
 Scales by feature size: large features get `01` + `02` + `04` (plus `03` only for genuinely multi-role features), medium get `01` + `04`, trivial ones skip the workflow entirely.
 
+Already have a spec or hand-off doc for the feature? It isn't regenerated: the doc is read, compared with the templates, and only the gaps are reported.
+
+Each `01` opens with a "read this first" status table, so a new chat can pick the feature up. Later requirement changes are added as dated Rev notes; locked decisions are never edited silently.
+
 **Use it when** a feature has real decisions to lock (cross-system, schema changes, multiple roles).
 
 It also keeps one planning doc, `docs/backlog.md` (built so far, next features, known issues, left out on purpose): created on the first run if missing, read as input on later runs, and updated only at the end, when you ask to fold a committed feature's docs into it.
