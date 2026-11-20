@@ -8,9 +8,10 @@ Personal [Claude Code](https://claude.com/claude-code) skills marketplace. Each 
 claude plugin marketplace add GWJian/claude-skills
 claude plugin install ui-redesign@gwj-skills
 claude plugin install spec-docs@gwj-skills
+claude plugin install multi-agent@gwj-skills
 ```
 
-Install one, both, or neither — each plugin is independent.
+Install any of them, or none — each plugin is independent.
 
 ## ui-redesign
 
@@ -56,6 +57,30 @@ spec-docs keeps one planning doc per project, `docs/backlog.md`, with four secti
 | Later runs | Read only, as research input: what is built, what earlier features decided |
 | While the feature is being built | Not touched — `docs/<feature>/` is the truth |
 | After the feature is committed, when you ask | The feature's docs are folded in (a Built so far row pointing at the commit, deferred decisions, unfixed issues), then `docs/<feature>/` is deleted; it stays readable in git |
+
+## multi-agent
+
+Runs one coding task with up to 4 parallel worker subagents, under fixed rules:
+
+- Worker model: on the first run in a project it asks once — all opus · xhigh, per part (opus for hard parts, sonnet for simple ones), or all sonnet · high — and saves the answer in `CLAUDE.local.md`. The review always runs on opus · high.
+- Preflight: files you had already changed before the run are listed and left out of the workers' files, the diff checks and the review.
+- Small or tightly linked tasks are done without workers.
+- Each worker owns a list of files and touches nothing else. Shared files (translations, routes, docs) are edited only by the main chat, from data files the workers leave in the scratchpad.
+- Workers run one quick check (lint). The main chat runs the full check (build + lint) once, reads every worker's real diff, and fixes what fails. A check with no real output counts as not run and is reported as unverified, never as passed.
+- Every code step ends with one fresh `/code-review` that also gets the spec references, to catch missed requirements.
+
+Project values (shared files, check commands, where the specs live) come from a "Multi-agent" section in the project's `CLAUDE.md` or `CLAUDE.local.md`:
+
+```
+## Multi-agent
+- Shared files (main chat only): `src/i18n/*.json`, `src/App.tsx`, docs
+- Worker check: `npm run lint`. Final check: `npm run build` + `npm run lint`
+- Spec references in briefs: 01/02 § of `docs/<feature>/`
+```
+
+No section? It reads the commands from `package.json` and says which values it picked.
+
+Runs only when you type `/multi-agent <task>`; Claude never starts it on its own.
 
 ## Update (after pushing changes)
 
