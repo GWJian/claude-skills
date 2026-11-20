@@ -15,6 +15,11 @@
       "name": "spec-docs",
       "source": "./plugins/spec-docs",
       "description": "Spec-Driven Development doc workflow (2-4 docs)"
+    },
+    {
+      "name": "multi-agent",
+      "source": "./plugins/multi-agent",
+      "description": "Parallel worker subagents with file ownership, diff checks and one review (/multi-agent only)"
     }
   ]
 }
