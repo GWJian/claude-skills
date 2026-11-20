@@ -1,0 +1,8 @@
+{
+  "name": "multi-agent",
+  "description": "Run a coding task with parallel worker subagents under fixed rules: split into independent parts, one file list per worker, check every diff, end with one review.",
+  "author": {
+    "name": "gwaijian",
+    "email": "gwaijian@gmail.com"
+  }
+}
