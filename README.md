@@ -60,16 +60,15 @@ spec-docs keeps one planning doc per project, `docs/backlog.md`, with four secti
 
 ## multi-agent
 
-Runs one coding task with up to 4 parallel worker subagents, under fixed rules:
+Runs one coding task with up to 4 parallel worker subagents. The main chat splits the task, gives each worker its own files, reads every worker's real diff, runs the full check once, and ends with one fresh code review that also checks the change against the spec.
 
-- Worker model: on the first run in a project it asks once — all opus · xhigh, per part (opus for hard parts, sonnet for simple ones), or all sonnet · high — and saves the answer in `CLAUDE.local.md`. The review always runs on opus · high.
-- Preflight: files you had already changed before the run are listed and left out of the workers' files, the diff checks and the review.
-- Small or tightly linked tasks are done without workers.
-- Each worker owns a list of files and touches nothing else. Shared files (translations, routes, docs) are edited only by the main chat, from data files the workers leave in the scratchpad.
-- Workers run one quick check (lint). The main chat runs the full check (build + lint) once, reads every worker's real diff, and fixes what fails. A check with no real output counts as not run and is reported as unverified, never as passed.
-- Every code step ends with one fresh `/code-review` that also gets the spec references, to catch missed requirements.
+**Use it when** a coding task has 2+ parts that do not depend on each other. Small or tightly linked tasks are done without workers. Files you had already changed before the run are left alone.
 
-Project values (shared files, check commands, where the specs live) come from a "Multi-agent" section in the project's `CLAUDE.md` or `CLAUDE.local.md`:
+Trigger with `/multi-agent <task>`; Claude never starts it on its own. The full rules are in the [skill file](plugins/multi-agent/skills/multi-agent/SKILL.md).
+
+### Project values
+
+Shared files, check commands and where the specs live come from a "Multi-agent" section in the project's `CLAUDE.md` or `CLAUDE.local.md`:
 
 ```
 ## Multi-agent
@@ -78,9 +77,26 @@ Project values (shared files, check commands, where the specs live) come from a 
 - Spec references in briefs: 01/02 § of `docs/<feature>/`
 ```
 
-No section? It reads the commands from `package.json` and says which values it picked.
+No section? It reads the commands from `package.json` (build, lint, and the tests if the project has them), treats any file that 2+ parts would change as shared, and says which values it picked. No spec docs? The briefs and the review get the requirements agreed in the chat.
 
-Runs only when you type `/multi-agent <task>`; Claude never starts it on its own.
+### Personal values
+
+These go in `CLAUDE.local.md`, since they depend on your plan and on what you installed:
+
+```
+## Multi-agent
+- Worker model: per part
+- Code map: graphify
+- Review command: /ponytail-review
+```
+
+| Line | What it does | No line |
+|------|--------------|---------|
+| `Worker model` | Which model the workers get: all opus · xhigh, per part (opus for hard parts, sonnet for simple ones), or all sonnet · high. The review always runs on opus · high. | Asked once on the first run, then saved |
+| `Code map: graphify` | Splits the task with [graphify](https://github.com/Graphify-Labs/graphify)'s code graph, to find links between parts that file names hide | Not used |
+| `Review command: /ponytail-review` | Runs [ponytail](https://github.com/DietrichGebert/ponytail)'s review instead of `/code-review high` | `/code-review high` |
+
+A tool that is not installed falls back to the default, and the chat says so.
 
 ## Update (after pushing changes)
 
