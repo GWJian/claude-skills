@@ -136,7 +136,7 @@ Every code step, done by you or by workers, ends with **one** full review by a f
 - **What it runs**: the Review command (default `/code-review high`) on the whole step's change.
 - **What you tell it**: which files belong to this step, which preflight files to skip, and the spec, so it also checks the change against the spec. Build, lint and a bug review cannot see a missed requirement.
 - **What it may not do**: change a file in the project. No fix, no temporary test: it reports, and you fix. Any command it runs, such as the tests, gets a time limit. Say both in its instructions.
-- **What comes back**: only its findings.
+- **What comes back**: only its findings. It writes all of them to a file in the scratchpad (give it the absolute path) and replies with a short summary. If the file write is refused, the findings go in its reply. Read the file, not only the summary: a long reply can arrive cut off.
 - **After it**: sort the findings, then run the final check again.
   - A bug in this step's change that you confirmed by reading the code: fix it.
   - A bug that was there before this step: change no code, and list it in the report. The exception is a bug that this step's change now lets happen: that one is this step's bug, so fix it.
@@ -148,7 +148,7 @@ Every code step, done by you or by workers, ends with **one** full review by a f
 - **When**: a fix changed what the code does (a condition, a guard, the order of steps, a wait, what is saved or shown). A rename, a comment, a type or formatting did not. If no fix changed behavior, there is no second review.
 - **Who**: a fresh subagent, `model: opus`, `effort: medium`. Narrowing the prompt alone has not made a review cheaper, so the effort is lower too.
 - **What it runs**: `/code-review medium`, or the Review command if one is set.
-- **What you tell it**: the list of fixes (for each one: the file, the place in it, and the finding it answers), and to review only those fixes and the code that calls them. The limits of the first review hold: no file changed, a time limit on every command.
+- **What you tell it**: the list of fixes (for each one: the file, the place in it, and the finding it answers), and to review only those fixes and the code that calls them. The limits of the first review hold: no project file changed, a time limit on every command. Its findings come back the same way, in a scratchpad file of their own.
 - **After it**: sort the findings the same way, fix what that leaves to fix, run the final check again, and stop. Never start a third review: a reviewer nearly always finds something, so reviewing until a round comes back clean does not end. What is left goes in the report.
 
 ## Step 7 — Report back
