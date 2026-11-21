@@ -7,17 +7,31 @@ disable-model-invocation: true
 
 Run the task in `$ARGUMENTS` with worker subagents. If it is empty, use the task already agreed in this chat.
 
+## Rules for every step
+
+These three rules hold in every step. The steps point to them and do not repeat them.
+
+1. **A check that did not run has not passed.** A check with no pasted output (its last lines and the exit code) counts as not run. Report it as "not run" or "unverified", never as "passed". A worker's "done" is a claim until you see the output.
+2. **Only the main chat edits a shared file.** A shared file is one the project lists as shared, or any file that 2+ parts would change. Every other file has exactly one owner. File ownership is what makes parallel work safe.
+3. **The spec decides what gets built.** The spec is the sections the Spec references value points to, or, with no spec docs, the requirements agreed in this chat. A write-less rule (such as ponytail's) or a review finding ("lean", "unused") never removes or shrinks something the spec asks for. Such a finding is not applied: list it in the report.
+
 ## Step 1 — Project values and preflight
 
-Read the project's `CLAUDE.md` and `CLAUDE.local.md` for a "Multi-agent" section. It gives:
+Read the "Multi-agent" section of the project's `CLAUDE.md` and `CLAUDE.local.md`:
 
-- **Shared files**: files only the main chat edits (for example translation files, the route file, docs).
-- **Worker check**: the one command each worker runs (for example lint).
-- **Final check**: the commands the main chat runs once at the end (for example build, then lint).
-- **Spec references**: where briefs point for the requirements (for example `01/02 §` of the feature docs).
-- **Worker model**: which model and effort workers get. It is personal (cost, plan limits), so it lives only in `CLAUDE.local.md`. See below.
+| Value | What it is | Where it lives | If the line is missing |
+|---|---|---|---|
+| Shared files | Files only the main chat edits (translation files, the route file, docs) | Either file | Any file that 2+ parts would change |
+| Worker check | The one command each worker runs (for example lint) | Either file | Take it from `package.json` or the project's build file |
+| Final check | The commands the main chat runs once at the end (for example build, then lint) | Either file | Take them from `package.json` or the build file: build, lint, and the tests if the project has them |
+| Spec references | Where briefs point for the requirements (for example `01/02 §` of the feature docs) | Either file | Write the requirements agreed in this chat into each brief and into the review instructions |
+| Worker model | The model and effort workers get | `CLAUDE.local.md` only: it is personal (cost, plan limits) | Ask once and save it (below) |
+| Code map | `graphify`: Step 2 uses the code graph to split the task | `CLAUDE.local.md`: it depends on the tools on this computer | No code map. Never ask, never write the line |
+| Review command | The command the Step 6 review runs, for example `/ponytail-review` | `CLAUDE.local.md`, for the same reason | `/code-review high`. Never ask, never write the line |
 
-A value is missing: take the check commands from `package.json` (or the project's build file), treat as shared any file that 2+ parts would change, and say in chat which values you used.
+Say in chat which values you filled in yourself, and say so when there is no spec doc.
+
+A team where everyone has the tools may put the Code map and Review command lines in `CLAUDE.md`. If either line is there, read its section at the end of this file now, and apply it in the steps it names.
 
 **Worker model, first run**: look for a `Worker model:` line in `CLAUDE.local.md`. If it is missing, ask the user once (one question, three choices):
 
@@ -27,11 +41,16 @@ A value is missing: take the check commands from `package.json` (or the project'
 
 Save the answer as one line in the "Multi-agent" section of `CLAUDE.local.md`, for example `- Worker model: per part`. Create the section, or the file, if missing; a new file that `.gitignore` does not cover gets added to `.gitignore`, and say so. Then continue. Later runs read the line and never ask; the user changes it by editing or deleting the line.
 
-**Preflight**: run `git status --short` and note every file already changed before this run. Those are the user's own edits:
+**Preflight**: do both before any file changes.
 
-- Give none of them to a worker, and leave them out of the Step 5 diff check and the Step 6 review.
-- If the task must change one of them, tell the user before starting.
-- List them in the final report as "left alone".
+1. Run `git status --short` and note every file already changed. Those are the user's own edits:
+   - Give none of them to a worker, and leave them out of the Step 6 review.
+   - If the task must change one of them, tell the user before starting.
+   - List them in the final report as "left alone".
+2. Take a snapshot, so Step 5 can see exactly what this run changed, even inside a file the user had already edited:
+   - Run `git stash create` and keep the hash it prints. It changes nothing: not the files, not the stash list. No output means nothing was changed yet: use `HEAD` as the snapshot.
+   - The snapshot leaves out files git does not track (`??` in the status). For each of those, keep its `git hash-object <file>`.
+   - If git cannot make a snapshot (a repository with no commit yet), say so and go on with the `git status` list alone. In Step 5, plain `git diff` then stands in for `git diff <snapshot>`.
 
 ## Step 2 — Split or not
 
@@ -44,33 +63,98 @@ Before starting any worker, say in chat how many workers, and for each one: what
 
 ## Step 4 — Brief and start the workers
 
+Before writing the briefs:
+
+- Decide everything that 2+ parts share: names, interfaces, data shapes, translation keys. Workers run in parallel and cannot see each other's code, so they follow your decisions and do not re-decide them.
+- Install any new dependency the task needs yourself. The package file and its lock file are shared files, and a worker may not run an install.
+
 Start each worker with the Agent tool, using the model and effort from the Worker model value (`opus` + `xhigh`, or `sonnet` + `high`). Send all of them in one message so they run in parallel.
 
-Every brief has:
+Every brief is this template. Fill in the `<...>` parts and keep the other lines word for word:
 
-1. **Goal**: what this part must do.
-2. **Spec references**: the exact sections to read.
-3. **Settled decisions**: the names, interfaces, data shapes and translation keys that 2+ parts share, decided by you before any worker starts. The worker follows them and does not re-decide them: workers run in parallel and cannot see each other's code.
-4. **Files it owns**: it may create or edit only these.
-5. **Files it must not touch**: every shared file, and every file another worker owns. No git command that changes anything (commit, stash, checkout, reset, restore): all workers share one folder.
-6. **Shared-file content**: anything meant for a shared file (for example new translation strings) goes into a data file in the scratchpad, such as `<scratchpad>/i18n-<part>.json`, for the main chat to merge. Data files like this are written fine.
-7. **Check**: run the worker check only, never the final check. Errors in files it does not own are not its job: other workers are still editing them. Paste its real output (the last lines and the exit code) in the report. A check that could not run is reported as "not run", never as "passed".
-8. **Done when**: the concrete finish line.
-9. **Report**: the full report goes to a named file in the scratchpad (give the absolute path), with a short summary back. Add this line: "If the file write is refused, put the full report in your reply instead." Long reports in a reply can arrive cut off, and a subagent was once refused a file named `report-*.md`.
+```text
+GOAL
+<what this part must do>
 
-File ownership is what makes parallel work safe. A file that two parts must change is a shared file: only the main chat edits it.
+SPEC
+<the exact sections to read, or, with no spec doc, this part's requirements written out>
+The spec decides what to build. Build everything it asks for, even when another rule tells you to write less.
+
+SETTLED DECISIONS
+<the names, interfaces, data shapes and translation keys this part shares with other parts>
+Follow these as written and do not re-decide them: other workers are building against them right now and cannot see your code.
+
+YOUR FILES
+<the files this worker owns>
+Create or edit only these.
+
+DO NOT TOUCH
+<every shared file, and every file another worker owns>
+All workers share this one folder, so:
+- No git command that changes anything (commit, stash, checkout, reset, restore).
+- No command that writes outside your files: no whole-project format or auto-fix (such as `dart format .` or `eslint --fix`), no code generator, no dependency install. Format or fix your own files by path only. If you need one of these commands, name it in your report and the main chat runs it.
+- Anything meant for a shared file (for example new translation strings) goes into <scratchpad>/<name>-<part>.json. The main chat merges it.
+
+CHECK
+Run only this, never the full build or the final check: <worker check>
+Errors in files you do not own are not your job: other workers are still editing them.
+Paste the real output in your report: the last lines and the exit code. If the check could not run, write "not run", never "passed".
+
+DONE WHEN
+<the concrete finish line>
+
+REPORT
+Write the full report to <absolute path in the scratchpad>. If the file write is refused, put the full report in your reply instead. Reply with a short summary only.
+The report lists: every file you created, changed or deleted; the check output; anything left undone; any command you need the main chat to run.
+```
+
+Why the report goes to a file: a long report in a reply can arrive cut off. Why the fallback line: a subagent was once refused a file named `report-*.md`. Data files for shared content are written fine.
 
 ## Step 5 — After the workers finish
 
-1. Read each worker's real change, not only its summary: `git diff` on the files it owns, and every new file in full (`git diff` does not show new files). Run `git status --short` too: a changed file that is neither in the preflight list nor owned by a worker means a worker left its files, so read that change, then keep or undo it. A worker's "done" is a claim: a check with no pasted output counts as not run.
-2. Merge the shared-file data files into the shared files yourself.
-3. Run the final check once. If it cannot run, the step is unverified, not passed.
-4. Fix or re-delegate whatever fails, each part once at most. A worker that left listable work undone (a missing file, a check not run) is resumed with SendMessage and told what is left: it keeps its context, and this counts as its one retry. A worker that skipped work goes again one effort level higher; one that tried hard but was still wrong goes again on opus · xhigh. A part that was already on opus · xhigh, or that fails a second time, you fix yourself or take to the user.
+1. **See what the run really changed.** Run `git diff <snapshot> --stat` and `git status --short`. The diff lists every tracked file changed since the snapshot, including a file the user had already edited; the status lists new files. For each untracked preflight file, run `git hash-object` again and compare. Then check ownership:
+   - Compare each worker's "files changed" list with the files it owns.
+   - A changed or new file that no worker owns, and that you did not change yourself: a worker left its files. Read that change, then keep it or undo it. `git restore --source=<snapshot> --worktree -- <file>` puts a file back as it was before the run; a new file is deleted.
+   - A preflight file that changed is the user's: show them the diff and ask before you keep or undo anything.
+2. **Read each worker's real change**, not only its summary: `git diff <snapshot>` on the files it owns, and every new file in full (`git diff` does not show new files).
+3. **Merge and run what was held back.** Merge the shared-file data files into the shared files yourself. Then run, once, the commands the workers asked for (a code generator, a format).
+4. **Run the final check once** (rule 1).
+5. **Fix or re-delegate whatever fails**, each part once at most:
+
+   | What happened | What to do |
+   |---|---|
+   | The worker left listable work undone (a missing file, a check not run) | Resume it with SendMessage and say what is left. It keeps its context. This counts as its one retry. |
+   | The worker skipped work | Start the part again, one effort level higher |
+   | The worker tried hard but was still wrong | Start the part again on opus · xhigh |
+   | The part was already on opus · xhigh, or it failed a second time | Fix it yourself, or take it to the user |
 
 ## Step 6 — Review
 
-Every code step, done by you or by workers, ends with **one** fresh review subagent (Agent tool, `model: opus`, `effort: high`, whatever the session model and effort are) that runs `/code-review` on the whole step's change. Tell it which files belong to this step, which preflight files to skip, and the spec references, so it also checks the change against them: build, lint and a bug review cannot see a missed requirement. Only its findings come back. Fix what it confirms, then run the final check again. Docs-only steps need no review.
+Every code step, done by you or by workers, ends with **one** fresh review subagent. Docs-only steps need no review.
+
+- **Who**: the Agent tool with `model: opus`, `effort: high`, whatever the session model and effort are.
+- **What it runs**: the Review command (default `/code-review high`) on the whole step's change.
+- **What you tell it**: which files belong to this step, which preflight files to skip, and the spec, so it also checks the change against the spec. Build, lint and a bug review cannot see a missed requirement.
+- **What comes back**: only its findings.
+- **After it**: fix what it confirms, then run the final check again. A finding that goes against the spec is not applied (rule 3).
 
 ## Step 7 — Report back
 
-Say what each worker returned, what you fixed, what the review found, which checks did not run (unverified), and which preflight files were left alone. Explain the step, then wait for the user's "go".
+Say what each worker returned, what you fixed, what the review found and which findings you did not apply (rule 3), which checks did not run (rule 1), and which preflight files were left alone. Explain the step, then wait for the user's "go".
+
+## Optional: graphify (`Code map: graphify`)
+
+Use it only when the line is there and the `graphify` command is found. No line, or a line set to `false`: no code map. The command is missing: no code map, and say so in chat.
+
+- **No `graphify-out/graph.json` yet**: say in one line that the user can build it with `/graphify .`, and split without it.
+- **Step 2, before deciding**: run `graphify query`, `graphify path` or `graphify explain` on the main components each part changes, to find links the file names do not show. Parts joined by a call or an import are not independent: merge them, or settle the interface between them first (Step 4). A file that 2+ parts reach is a shared file.
+- **Limits**: the graph maps the code as it was before this run, and some links are `INFERRED`. Read the code before you rely on a link, and never use the graph to check the workers' changes.
+- **Step 4, add to every brief**: "You may run `graphify query` to find existing code. Read a file before you change it. If the graphify hook refuses a Read or Grep, run one `graphify query` on that area, then try again."
+
+## Optional: review command (`Review command: <command>`)
+
+Step 6 runs this command in place of `/code-review high`, for example `/ponytail-review`.
+
+- No line, or a line set to `false`: `/code-review high`. The review itself always runs.
+- The command is not in your skill list: `/code-review high`, and say so in chat.
+- A `/code-review` with no level also runs at `high`: without a level it reuses the one the user typed last.
