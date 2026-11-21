@@ -15,6 +15,22 @@ These three rules hold in every step. The steps point to them and do not repeat 
 2. **Only the main chat edits a shared file.** A shared file is one the project lists as shared, or any file that 2+ parts would change. Every other file has exactly one owner. File ownership is what makes parallel work safe.
 3. **The spec decides what gets built.** The spec is the sections the Spec references value points to, or, with no spec docs, the requirements agreed in this chat. A write-less rule (such as ponytail's) or a review finding ("lean", "unused") never removes or shrinks something the spec asks for. Such a finding is not applied: list it in the report.
 
+## Helper for lookups (any step)
+
+A lookup with a lot to read and a short answer goes to a helper, so the reading stays out of the main chat. For example:
+
+- **Step 2**: the files that touch a feature across many folders, or the layout of a large folder; who calls or imports a file; how a similar feature was built before (`git log`, `git blame`).
+- **Step 4**: one existing file that already follows the pattern a part needs, for its brief to point to; the signature of an API in an installed package's source.
+- **Step 5**: the errors in a long lint, build or test log, grouped by file.
+
+How to use it:
+
+- **Who**: the Agent tool with `subagent_type: Explore`, `model: haiku`, `effort: high`. Send several lookups in one message so they run in parallel. Helpers do not count toward the 4 workers.
+- **Not for one command**: a single `ls`, file search, `git status` or log tail costs less done yourself than explained in a brief.
+- **Not for anything that changes a file**: a rename, a move, a delete, an edit. Every file has one owner (rule 2), and a rename also changes the imports that point to the file. Say in the helper's brief: read only, change nothing.
+- **Not for the checks in this file**: you read the workers' diffs yourself (Step 5), and you take a check's output and exit code yourself (rule 1). A helper may point to the failing lines in a log. It never decides that a check passed.
+- **What comes back**: paths, and log lines quoted with their line numbers. Treat them as pointers: read the file or the lines yourself before you act on them.
+
 ## Step 1 — Project values and preflight
 
 Read the "Multi-agent" section of the project's `CLAUDE.md` and `CLAUDE.local.md`:

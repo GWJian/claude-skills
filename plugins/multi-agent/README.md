@@ -56,6 +56,7 @@ Runs one coding task with up to 4 parallel worker subagents. This page shows the
 - **SNAP**: the snapshot from `git stash create`. It changes no file. Step 5 compares against it to see exactly what the run changed.
 - **Step 6**: the review runs `/code-review high`, or the command set in `Review command` (for example `/ponytail-review`). The reviewer changes no project file, and writes its findings to the scratchpad. The main chat fixes only the bugs it confirms in this step's change; small suggestions, and bugs that were there before, go in the report for you to decide. If a fix changed behavior, one smaller second review (opus · medium) looks at the fixes only. There is never a third.
 - **Step 7**: the main chat reports what happened, then waits for your "go".
+- **Helper (any step)**: a lookup with a lot to read and a short answer (find files across many folders, find the errors in a long log) goes to a haiku · high helper. It reads only: renames and every other file change stay with the main chat or the worker that owns the file.
 
 ## Who can change which files
 
