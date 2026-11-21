@@ -130,17 +130,30 @@ Why the report goes to a file: a long report in a reply can arrive cut off. Why 
 
 ## Step 6 — Review
 
-Every code step, done by you or by workers, ends with **one** fresh review subagent. Docs-only steps need no review.
+Every code step, done by you or by workers, ends with **one** full review by a fresh subagent. Docs-only steps need no review.
 
 - **Who**: the Agent tool with `model: opus`, `effort: high`, whatever the session model and effort are.
 - **What it runs**: the Review command (default `/code-review high`) on the whole step's change.
 - **What you tell it**: which files belong to this step, which preflight files to skip, and the spec, so it also checks the change against the spec. Build, lint and a bug review cannot see a missed requirement.
+- **What it may not do**: change a file in the project. No fix, no temporary test: it reports, and you fix. Any command it runs, such as the tests, gets a time limit. Say both in its instructions.
 - **What comes back**: only its findings.
-- **After it**: fix what it confirms, then run the final check again. A finding that goes against the spec is not applied (rule 3).
+- **After it**: sort the findings, then run the final check again.
+  - A bug in this step's change that you confirmed by reading the code: fix it.
+  - A bug that was there before this step: change no code, and list it in the report. The exception is a bug that this step's change now lets happen: that one is this step's bug, so fix it.
+  - A small suggestion (style, naming, a cleanup, "this could be faster"): change no code, and list it in the report. One that swaps or removes a check can take away what the check was guarding against, so the user decides.
+  - A finding that goes against the spec: not applied (rule 3).
+
+**Second review, once at most.** A fix is new code that no review has seen, so a fix that changed behavior gets one more look:
+
+- **When**: a fix changed what the code does (a condition, a guard, the order of steps, a wait, what is saved or shown). A rename, a comment, a type or formatting did not. If no fix changed behavior, there is no second review.
+- **Who**: a fresh subagent, `model: opus`, `effort: medium`. Narrowing the prompt alone has not made a review cheaper, so the effort is lower too.
+- **What it runs**: `/code-review medium`, or the Review command if one is set.
+- **What you tell it**: the list of fixes (for each one: the file, the place in it, and the finding it answers), and to review only those fixes and the code that calls them. The limits of the first review hold: no file changed, a time limit on every command.
+- **After it**: sort the findings the same way, fix what that leaves to fix, run the final check again, and stop. Never start a third review: a reviewer nearly always finds something, so reviewing until a round comes back clean does not end. What is left goes in the report.
 
 ## Step 7 — Report back
 
-Say what each worker returned, what you fixed, what the review found and which findings you did not apply (rule 3), which checks did not run (rule 1), and which preflight files were left alone. Explain the step, then wait for the user's "go".
+Say what each worker returned, what you fixed, what each review found, which findings you did not apply (small suggestions, bugs that were there before this step, and rule 3), which fixes came after the last review (no review has seen them), which checks did not run (rule 1), and which preflight files were left alone. Explain the step, then wait for the user's "go".
 
 ## Optional: graphify (`Code map: graphify`)
 
@@ -153,8 +166,8 @@ Use it only when the line is there and the `graphify` command is found. No line,
 
 ## Optional: review command (`Review command: <command>`)
 
-Step 6 runs this command in place of `/code-review high`, for example `/ponytail-review`.
+Step 6 runs this command in both reviews, in place of `/code-review high` and `/code-review medium`, for example `/ponytail-review`.
 
-- No line, or a line set to `false`: `/code-review high`. The review itself always runs.
-- The command is not in your skill list: `/code-review high`, and say so in chat.
-- A `/code-review` with no level also runs at `high`: without a level it reuses the one the user typed last.
+- No line, or a line set to `false`: `/code-review high`, then `/code-review medium` for the second review. The first review always runs.
+- The command is not in your skill list: the same defaults, and say so in chat.
+- A `/code-review` with no level gets `high` in the first review and `medium` in the second: without a level it reuses the one the user typed last.
