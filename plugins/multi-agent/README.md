@@ -43,6 +43,8 @@ Runs one coding task with up to 4 parallel worker subagents. This page shows the
                 ▼
 ┌────────────────────────────────┐
 │ 6  REVIEW (fresh subagent)     │  opus · high, gets the spec too
+│    fix confirmed bugs only     │  small suggestions go in the report
+│    2nd review: once at most    │  only if a fix changed behavior
 └───────────────┬────────────────┘
                 ▼
 ┌────────────────────────────────┐
@@ -52,7 +54,7 @@ Runs one coding task with up to 4 parallel worker subagents. This page shows the
 
 - **Left line**: a small task, or parts that depend on each other. The main chat does the task itself, runs the final check, and goes straight to step 6.
 - **SNAP**: the snapshot from `git stash create`. It changes no file. Step 5 compares against it to see exactly what the run changed.
-- **Step 6**: the review runs `/code-review high`, or the command set in `Review command` (for example `/ponytail-review`).
+- **Step 6**: the review runs `/code-review high`, or the command set in `Review command` (for example `/ponytail-review`). The reviewer changes no project file, and writes its findings to the scratchpad. The main chat fixes only the bugs it confirms in this step's change; small suggestions, and bugs that were there before, go in the report for you to decide. If a fix changed behavior, one smaller second review (opus · medium) looks at the fixes only. There is never a third.
 - **Step 7**: the main chat reports what happened, then waits for your "go".
 
 ## Who can change which files
