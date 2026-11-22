@@ -102,6 +102,7 @@ EXAMPLE TO FOLLOW
 SETTLED DECISIONS
 <the names, interfaces, data shapes and translation keys this part shares with other parts>
 Follow these as written and do not re-decide them: other workers are building against them right now and cannot see your code.
+If one of them cannot work, do not work around it: finish what does not depend on it, and say in your report which decision and why.
 
 YOUR FILES
 <the files this worker owns>
@@ -146,6 +147,7 @@ Start this step only when every worker has replied. A worker that is still runni
    | What happened | What to do |
    |---|---|
    | The worker left listable work undone (a missing file, a check not run) | Resume it with SendMessage and say what is left. It keeps its context. |
+   | A worker reported that a settled decision cannot work | Check the claim in the code. If it holds, the brief was wrong, not the worker, and a stronger model does not fix a wrong brief: settle the decision again yourself, then resume every worker whose part uses it with SendMessage and say what changed. If it does not hold, treat it as the next row. |
    | Anything else: work skipped, or work done but wrong | Start the part again with a new worker, one step up this ladder: sonnet · high → opus · medium → opus · high → fable · medium |
    | The part failed its second retry, it was already on fable · medium, or a fable worker cannot be started | Fix it yourself, or take it to the user |
 
