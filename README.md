@@ -92,7 +92,7 @@ These go in `CLAUDE.local.md`, since they depend on your plan and on what you in
 
 | Line | What it does | No line |
 |------|--------------|---------|
-| `Worker model` | Which model the workers get: all opus · xhigh, per part (opus for hard parts, sonnet for simple ones), or all sonnet · high. The review always runs on opus · high. | Asked once on the first run, then saved |
+| `Worker model` | Which model the workers get: all opus · high, per part (opus for hard parts, sonnet for simple ones), or all sonnet · high. A part that fails is started again one step up: sonnet · high → opus · medium → opus · high → fable · medium. The review always runs on opus · high. | Asked once on the first run, then saved |
 | `Code map: graphify` | Splits the task with [graphify](https://github.com/Graphify-Labs/graphify)'s code graph, to find links between parts that file names hide | Not used |
 | `Review command: /ponytail-review` | Runs [ponytail](https://github.com/DietrichGebert/ponytail)'s review instead of `/code-review high` | `/code-review high` |
 

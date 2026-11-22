@@ -51,15 +51,15 @@ A team where everyone has the tools may put the Code map and Review command line
 
 **Worker model, first run**: look for a `Worker model:` line in `CLAUDE.local.md`. If it is missing, ask the user once (one question, three choices):
 
-1. **All opus · xhigh**: strongest, costs the most.
-2. **Per part** (recommended): opus · xhigh for hard parts (business rules, money, stock, orders, sign-in, data writes), sonnet · high for simple parts that follow a clear pattern (a screen from the design, translations, tests). Unsure → opus.
+1. **All opus · high**: strongest, costs the most.
+2. **Per part** (recommended): opus · high for hard parts (business rules, money, stock, orders, sign-in, data writes), sonnet · high for simple parts that follow a clear pattern (a screen from the design, translations, tests). Unsure → opus.
 3. **All sonnet · high**: cheapest, for projects where cost matters more than quality.
 
 Save the answer as one line in the "Multi-agent" section of `CLAUDE.local.md`, for example `- Worker model: per part`. Create the section, or the file, if missing; a new file that `.gitignore` does not cover gets added to `.gitignore`, and say so. Then continue. Later runs read the line and never ask; the user changes it by editing or deleting the line.
 
 **Preflight**: do both before any file changes.
 
-1. Run `git status --short` and note every file already changed. Those are the user's own edits:
+1. Run `git status --short -uall` and note every file already changed. `-uall` lists the files in a new folder one by one: without it a new folder is one line, and a change inside it stays hidden. Those files are the user's own edits:
    - Give none of them to a worker, and leave them out of the Step 6 review.
    - If the task must change one of them, tell the user before starting.
    - List them in the final report as "left alone".
@@ -71,7 +71,7 @@ Save the answer as one line in the "Multi-agent" section of `CLAUDE.local.md`, f
 ## Step 2 — Split or not
 
 - Small task, or the parts depend on each other: do it yourself, no workers. Say so in one line, run the final check as in Step 5, then skip to Step 6.
-- 2+ independent parts: one worker per part, **max 4**.
+- 2+ independent parts: one worker per part, **max 4**. More than 4 parts: join the closest ones until 4 are left. Start more than 4 workers only when the user asks for more in this run.
 
 ## Step 3 — Announce
 
@@ -84,7 +84,7 @@ Before writing the briefs:
 - Decide everything that 2+ parts share: names, interfaces, data shapes, translation keys. Workers run in parallel and cannot see each other's code, so they follow your decisions and do not re-decide them.
 - Install any new dependency the task needs yourself. The package file and its lock file are shared files, and a worker may not run an install.
 
-Start each worker with the Agent tool, using the model and effort from the Worker model value (`opus` + `xhigh`, or `sonnet` + `high`). Send all of them in one message so they run in parallel.
+Start each worker with the Agent tool, using the model from the Worker model value (`opus` or `sonnet`), both at effort `high`. Send all of them in one message so they run in parallel.
 
 Every brief is this template. Fill in the `<...>` parts and keep the other lines word for word:
 
@@ -95,6 +95,9 @@ GOAL
 SPEC
 <the exact sections to read, or, with no spec doc, this part's requirements written out>
 The spec decides what to build. Build everything it asks for, even when another rule tells you to write less.
+
+EXAMPLE TO FOLLOW
+<one existing file that already follows the pattern this part needs, or "none">
 
 SETTLED DECISIONS
 <the names, interfaces, data shapes and translation keys this part shares with other parts>
@@ -118,31 +121,39 @@ Paste the real output in your report: the last lines and the exit code. If the c
 
 DONE WHEN
 <the concrete finish line>
+Before you report, check your files against this finish line and the SPEC, point by point. Finish what is missing. What you cannot finish goes in the report as left undone.
 
 REPORT
 Write the full report to <absolute path in the scratchpad>. If the file write is refused, put the full report in your reply instead. Reply with a short summary only.
-The report lists: every file you created, changed or deleted; the check output; anything left undone; any command you need the main chat to run.
+The report lists: every file you created, changed or deleted; every decision you made that this brief did not settle, and why; the check output; anything left undone; any command you need the main chat to run.
 ```
 
 Why the report goes to a file: a long report in a reply can arrive cut off. Why the fallback line: a subagent was once refused a file named `report-*.md`. Data files for shared content are written fine.
 
 ## Step 5 — After the workers finish
 
-1. **See what the run really changed.** Run `git diff <snapshot> --stat` and `git status --short`. The diff lists every tracked file changed since the snapshot, including a file the user had already edited; the status lists new files. For each untracked preflight file, run `git hash-object` again and compare. Then check ownership:
+Start this step only when every worker has replied. A worker that is still running is still changing files, so a diff or a check taken now would be wrong.
+
+1. **See what the run really changed.** Run `git diff <snapshot> --stat` and `git status --short -uall`. The diff lists every tracked file changed since the snapshot, including a file the user had already edited; the status lists new files. For each untracked preflight file, run `git hash-object` again and compare. Then check ownership:
    - Compare each worker's "files changed" list with the files it owns.
    - A changed or new file that no worker owns, and that you did not change yourself: a worker left its files. Read that change, then keep it or undo it. `git restore --source=<snapshot> --worktree -- <file>` puts a file back as it was before the run; a new file is deleted.
    - A preflight file that changed is the user's: show them the diff and ask before you keep or undo anything.
 2. **Read each worker's real change**, not only its summary: `git diff <snapshot>` on the files it owns, and every new file in full (`git diff` does not show new files).
 3. **Merge and run what was held back.** Merge the shared-file data files into the shared files yourself. Then run, once, the commands the workers asked for (a code generator, a format).
 4. **Run the final check once** (rule 1).
-5. **Fix or re-delegate whatever fails**, each part once at most:
+5. **Fix or re-delegate whatever fails**, each part twice at most. A resume and a restart each count as one retry.
 
    | What happened | What to do |
    |---|---|
-   | The worker left listable work undone (a missing file, a check not run) | Resume it with SendMessage and say what is left. It keeps its context. This counts as its one retry. |
-   | The worker skipped work | Start the part again, one effort level higher |
-   | The worker tried hard but was still wrong | Start the part again on opus · xhigh |
-   | The part was already on opus · xhigh, or it failed a second time | Fix it yourself, or take it to the user |
+   | The worker left listable work undone (a missing file, a check not run) | Resume it with SendMessage and say what is left. It keeps its context. |
+   | Anything else: work skipped, or work done but wrong | Start the part again with a new worker, one step up this ladder: sonnet · high → opus · medium → opus · high → fable · medium |
+   | The part failed its second retry, it was already on fable · medium, or a fable worker cannot be started | Fix it yourself, or take it to the user |
+
+   A new worker knows nothing of the last attempt. Its brief is the part's brief with a handoff added at the top, in this order:
+
+   - What you found wrong, from the diff and the check output. This comes first: the last worker reported the part as done, so its report does not say what is wrong.
+   - The path of the last worker's report, and this line: "This is the last worker's own account. It may be wrong."
+   - This line: "The files are as the last attempt left them. Read them first, and keep what is right."
 
 ## Step 6 — Review
 
