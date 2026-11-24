@@ -168,11 +168,12 @@ Start this step only when every worker has replied. A worker that is still runni
    - This line: "The files are as the last attempt left them. Read them first, and keep what is right."
 
 6. **UI check, when this step changes a screen.** Open the screen before the review, not during it: a screen that breaks on first open should be fixed before a reviewer reads the code. You never drive the browser yourself: in past runs, browser work in the main chat cost more than all the workers together.
-   - **Who**: one checker subagent, the Agent tool with `model: sonnet`, `effort: high`.
-   - **What you tell it**: the screens to open; the lines of DONE WHEN (and of the spec) that can be seen on screen; how to open the app (the URL, the command that starts it if it is not running, a test login if one is needed). Also check on every screen: it loads, and the console shows no error.
+   - **Who**: one checker subagent per 1 or 2 screens, at most 3 checkers, each the Agent tool with `model: sonnet`, `effort: high`. Send them all in one message. Why: every checker turn re-sends its whole context, and screenshots make it grow fast. In past runs one checker for all screens took 81 to 151 turns, reached 300k context, and once cost 7 times what the workers did.
+   - **What you tell it**: its screens; the lines of DONE WHEN (and of the spec) that can be seen on them; how to open the app (the URL, the command that starts it if it is not running, a test login if one is needed). Also check on every screen: it loads, and the console shows no error. With 2+ checkers, start the app yourself first, or tell only one checker to start it, so they do not start it twice.
+   - **How it looks** (say it in its instructions): read the page as text first (`get_page_text`, `find`, `read_page`). Take a screenshot only for a line about how something looks (layout, color, spacing). Do several clicks and typing in one `browser_batch` call, not one call each.
    - **What it may not do**: change a file in the project. A server it started, it stops at the end.
-   - **What comes back**: pass or fail for each line, with what it saw as evidence (the text on screen, the console error), written to a scratchpad file. It replies with a short summary.
-   - **After it**: fix what failed, run the final check again, then send the same checker the failed lines only (SendMessage). It keeps its context. Twice at most, then list what still fails in the report.
+   - **What comes back**: pass or fail for each line, with what it saw as evidence (the text on screen, the console error), written to its own scratchpad file. It replies with a short summary.
+   - **After it**: fix what failed, run the final check again, then start a fresh checker with only the failed lines and how to open the app. Not SendMessage: the old checker would re-send its full context on every turn. Twice at most, then list what still fails in the report.
 
 ## Step 6 — Review
 
