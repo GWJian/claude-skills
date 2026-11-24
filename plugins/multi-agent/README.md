@@ -48,8 +48,8 @@ haiku · high              your session model                (subagents)
                                        │               │    │ then the main chat       │
                                        │               │    └──────────────────────────┘
                                        │               │    ┌──────────────────────────┐
-                                       │               └───>│ CHECKER  sonnet · high   │
-                                       │                    │ opens each screen,       │
+                                       │               └───>│ CHECKERS sonnet · high   │
+                                       │                    │ 1-2 screens each, max 3  │
                                        │                    │ pass/fail with evidence  │
                                        │                    └──────────────────────────┘
                                        ▼
@@ -71,13 +71,13 @@ haiku · high              your session model                (subagents)
 2. **Split or not.** A small task, or parts that depend on each other: no workers start. The main chat does the task itself, runs the final check, and goes straight to step 6. 2+ independent parts: one worker per part, 4 at most. More than 4 parts are joined until 4 are left, unless you ask for more workers in that run. With the optional `graphify` code map, the main chat first looks for links the file names do not show.
 3. **Announce.** Before any worker starts, the main chat says how many workers, what each one does, which files it owns, and its model.
 4. **Brief and start the workers.** A helper first reads the long reference material (design boards, old code) and returns a short digest. The main chat then settles what the parts share (names, interfaces), checks each decision against real data, and names which part owns each shared concern. All workers start in one message, so they run in parallel. The rules that are the same for every worker are in [worker-rules.md](skills/multi-agent/worker-rules.md), so each brief holds only its own parts. Each worker edits only its own files, runs only the worker check, checks its work against the finish line and the spec, and writes a short report to the scratchpad. The report also says which decisions the worker made itself, and why.
-5. **After the workers.** The main chat waits until every worker has replied. It then compares against the snapshot to see whether a worker left its files, reads every real source diff and not only the report, merges the shared files, and runs the final check (build, lint, tests) once. A part that fails is retried twice at most. A restart goes to a new worker one step up the ladder, and its brief starts with a handoff: what was wrong, the last worker's report, and the files as they were left. When the step changes a screen, a checker subagent opens it and checks the finish line before the review. The main chat never drives the browser itself.
+5. **After the workers.** The main chat waits until every worker has replied. It then compares against the snapshot to see whether a worker left its files, reads every real source diff and not only the report, merges the shared files, and runs the final check (build, lint, tests) once. A part that fails is retried twice at most. A restart goes to a new worker one step up the ladder, and its brief starts with a handoff: what was wrong, the last worker's report, and the files as they were left. When the step changes a screen, checker subagents (one per 1 or 2 screens, 3 at most) open them and check the finish line before the review. They read the page as text and take a screenshot only for how something looks. A retry goes to a fresh checker with only the failed lines. The main chat never drives the browser itself.
 6. **Review.** A fresh subagent runs `/code-review high`, or the command set in `Review command` (for example `/ponytail-review`), and gets the spec too. The reviewer changes no project file, and writes its findings, with those of any agent its review command starts, to one file in the scratchpad. The main chat fixes only the bugs it confirms in this step's change; small suggestions, and bugs that were there before, go in the report for you to decide. If a fix changed behavior, one smaller second review looks at the fixes only. There is never a third.
 7. **Report.** The main chat reports what happened, adds a token table per agent from [run_stats.py](skills/multi-agent/run_stats.py), then waits for your "go".
 
 ### Why the main chat stays small
 
-Every main-chat turn re-sends the whole chat, so its cost grows with each turn. In past runs the main chat used about 65% of all tokens. So long reading goes to helpers, browser checks go to the checker, and the main chat decides, merges, fixes and checks.
+Every main-chat turn re-sends the whole chat, so its cost grows with each turn. In past runs the main chat used about 65% of all tokens. So long reading goes to helpers, browser checks go to small checkers, and the main chat decides, merges, fixes and checks.
 
 ### Who runs on which model
 
@@ -86,7 +86,7 @@ Every main-chat turn re-sends the whole chat, so its cost grows with each turn. 
 | Main chat | The model of your session | Runs the steps. Only it edits shared files and runs the final check. |
 | Helper | haiku · high | Read-only lookups with a lot to read and a short answer: a digest of design boards or old code before the briefs, files across many folders, the errors in a long log. It returns pointers, and the main chat reads the real file or log lines itself. Renames and every other file change stay with the main chat or the worker that owns the file. |
 | Workers | The `Worker model` line in `CLAUDE.local.md`: all opus · high, per part (as drawn), or all sonnet · high | Build their own files. A worker that left listable work undone is resumed. Any other failed part is started again one step up the ladder: sonnet · high → opus · medium → opus · high → fable · medium. After two retries, or past the top of the ladder, the main chat fixes the part or takes it to you. |
-| Checker | sonnet · high | When a step changes a screen: opens it before the review and returns pass or fail for each line of the finish line, with evidence. Changes no file. |
+| Checker | sonnet · high | When a step changes a screen: one per 1 or 2 screens, 3 at most. Opens them before the review and returns pass or fail for each line of the finish line, with evidence. Changes no file. |
 | Reviewer | opus · high. Second review: opus · medium | Reviews the whole step's change, then only the fixes. |
 
 ## Who can change which files
