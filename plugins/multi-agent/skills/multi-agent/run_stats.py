@@ -4,7 +4,7 @@ Usage:
   python run_stats.py <project transcript folder> [start time, ISO, e.g. 2026-11-23T11:09:00]
   python run_stats.py --selftest
 
-The transcript folder is ~/.claude/projects/<project path with every : \\ / replaced by ->.
+The transcript folder is ~/.claude/projects/<project path with every character that is not a letter or a digit replaced by ->.
 The newest session file in it is the current session; pass a session .jsonl instead to pick an older one.
 With a start time, only lines from then on count.
 "Processed" = every input token sent to the model (new + cache write + cache read).

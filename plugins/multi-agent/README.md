@@ -105,3 +105,49 @@ All workers share one project folder. File ownership keeps them apart:
 - **W1–W4 files**: every file has exactly one owner. A worker creates or edits only its own files.
 - **Shared files**: translation files, the route file, docs, the package file and its lock file. A worker that needs to add to one writes a data file in the scratchpad, and the main chat merges it.
 - **Your edits**: files you had already changed before the run. No worker gets them. If the task must change one, the main chat tells you before starting.
+
+## Project values (optional)
+
+Copy these into your project's `CLAUDE.md` (shared with the team) or `CLAUDE.local.md` (only you). Fill in the `<...>` parts. Every line is optional: a missing line falls back to the default in [SKILL.md](skills/multi-agent/SKILL.md) Step 1.
+
+```markdown
+## Multi-agent
+
+- Shared files (main chat only): <files only the main chat edits: translations, routes, package and lock files, docs>
+- Worker check: <one fast check each worker runs on its own files>
+- Final check: <commands the main chat runs once at the end, in order>
+- Spec references: <where the requirements live>
+- Worker model: <all opus · high | per part | all sonnet · high>
+- Code map: <graphify | false>
+- Review command: <a review slash command | false>
+```
+
+- `Worker model` goes in `CLAUDE.local.md` only: it is personal (cost, plan limits). If it is missing, the skill asks once and saves it.
+- `Review command` defaults to `/code-review high`.
+
+Examples by stack:
+
+| Value | Node / React | Flutter | Python |
+|---|---|---|---|
+| Shared files | `src/i18n/*.json`, `package.json`, `package-lock.json`, docs | `lib/l10n/*.arb`, `pubspec.yaml`, `pubspec.lock`, docs | `pyproject.toml`, the lock file, docs |
+| Worker check | `npm run lint` | `dart analyze` | `ruff check` |
+| Final check | `npm run build`, then `npm run lint`, then `npm test` | `flutter analyze`, then `flutter test` | `ruff check`, then `pytest` |
+| Spec references | `01/02 § of docs/<feature>/` | same | same |
+
+### Code graph (graphify)
+
+Only with `Code map: graphify`. Needs the `graphify` command and a built graph (`/graphify .` in the repo it maps).
+
+```markdown
+## Code graph (graphify)
+
+- Graph: <path to graph.json>
+- Query: graphify query "<question>" --graph <graph path>
+  (the same --graph for graphify explain "<symbol>" and graphify path "A" "B")
+- Refresh after a pull, in the repo it maps: <refresh command>
+- Maps code only: docs, images and SQL are not in the graph.
+```
+
+- `Graph`: this repo's graph is `graphify-out/graph.json`, and that is the default when the line is missing. It can also point to another repo, for example the old app a rewrite ports: use its absolute path.
+- Refresh command: for example `GRAPHIFY_BACKEND=none graphify update .` (code only, no AI call).
+- The skill reads only the `Graph:` line, under any heading, and passes `--graph` to every graphify command, its workers' too.
