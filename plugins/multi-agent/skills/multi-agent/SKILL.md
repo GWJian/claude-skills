@@ -48,7 +48,7 @@ Read the "Multi-agent" section of the project's `CLAUDE.md` and `CLAUDE.local.md
 | Final check | The commands the main chat runs once at the end (for example build, then lint) | Either file | Take them from `package.json` or the build file: build, lint, and the tests if the project has them |
 | Spec references | Where briefs point for the requirements (for example `01/02 §` of the feature docs) | Either file | Write the requirements agreed in this chat into each brief and into the review instructions |
 | Worker model | The model and effort workers get | `CLAUDE.local.md` only: it is personal (cost, plan limits) | Ask once and save it (below) |
-| Code map | `graphify`: Step 2 uses the code graph to split the task | `CLAUDE.local.md`: it depends on the tools on this computer | No code map. Never ask, never write the line |
+| Code map | `graphify`: Step 2 uses the code graph to split the task. The graph file is the `Graph:` line (see the graphify section at the end) | `CLAUDE.local.md`: it depends on the tools on this computer | No code map. Never ask, never write the line |
 | Review command | The command the Step 6 review runs, for example `/ponytail-review` | `CLAUDE.local.md`, for the same reason | `/code-review high`. Never ask, never write the line |
 
 Say in chat which values you filled in yourself, and say so when there is no spec doc.
@@ -217,10 +217,11 @@ Explain the step, then wait for the user's "go".
 
 Use it only when the line is there and the `graphify` command is found. No line, or a line set to `false`: no code map. The command is missing: no code map, and say so in chat.
 
-- **No `graphify-out/graph.json` yet**: say in one line that the user can build it with `/graphify .`, and split without it.
+- **Which graph**: the `Graph:` line in `CLAUDE.md` or `CLAUDE.local.md`, under any heading. It may point to another repo, for example the old app a rewrite ports. No `Graph:` line: `graphify-out/graph.json` in this repo. Below, `<graph>` is that path, and every `graphify` command gets `--graph <graph>`.
+- **No graph at `<graph>` yet**: say in one line that the user can build it with `/graphify .` in the repo it maps, and split without it.
 - **Step 2, before deciding**: run `graphify query`, `graphify path` or `graphify explain` on the main components each part changes, to find links the file names do not show. Parts joined by a call or an import are not independent: merge them, or settle the interface between them first (Step 4). A file that 2+ parts reach is a shared file.
-- **Limits**: the graph maps the code as it was before this run, and some links are `INFERRED`. Read the code before you rely on a link, and never use the graph to check the workers' changes.
-- **Step 4, add to every brief**: "You may run `graphify query` to find existing code. Read a file before you change it. If the graphify hook refuses a Read or Grep, run one `graphify query` on that area, then try again."
+- **Limits**: the graph maps the code as it was before this run, and some links are `INFERRED`. Read the code before you rely on a link, and never use the graph to check the workers' changes. A graph of another repo shows nothing about this one: read this repo's files for the links between parts.
+- **Step 4, add to every brief**: "You may run `graphify query '<question>' --graph <graph>` to find existing code. Read a file before you change it. If the graphify hook refuses a Read or Grep, run one `graphify query` with the same `--graph` on that area, then try again."
 
 ## Optional: review command (`Review command: <command>`)
 
